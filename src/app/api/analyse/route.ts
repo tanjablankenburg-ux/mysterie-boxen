@@ -23,12 +23,14 @@ export async function POST(req: NextRequest) {
 
 WICHTIG: Der Nutzer hat den Zustand als "${zustand}" angegeben. Übernimm diesen Zustand EXAKT so in "zustand_bewertung" — erfinde keinen anderen. Wenn der Nutzer "Neu" angibt und ein Preisschild sichtbar ist, dann ist der Zustand "Neuwertig". Vertraue der Angabe des Nutzers.
 
+ECHTHEIT: Sei ehrlich und vorsichtig. Fotos allein reichen selten für eine sichere Echtheitsprüfung. Sage NUR dann "Gefälscht" wenn es eindeutige, unübersehbare Fälschungsmerkmale gibt (z.B. grobe Rechtschreibfehler im Logo, offensichtlich falsche Farben). Bei jeder Unsicherheit: "Nicht sicher erkennbar". Widerspreche dir nicht selbst — wenn du ein Merkmal nennst, nutze es nicht gleichzeitig als Beweis für Echtheit UND Fälschung.
+
 Erstelle eine JSON-Antwort mit folgenden Feldern:
 {
   "bezeichnung": "Genaue Produktbezeichnung (Marke, Modell, Größe etc.)",
   "kategorie": "Eine von: Elektronik, Spielzeug, Kleidung, Schuhe, Schmuck, Haushalt, Sport, Bücher, Sammler, Sonstiges",
-  "echtheit": "Echt / Gefälscht / Wahrscheinlich echt / Wahrscheinlich gefälscht / Nicht erkennbar",
-  "echtheit_begruendung": "Kurze Begründung zur Echtheit",
+  "echtheit": "Nur EINE dieser Optionen: 'Echt' (eindeutige Originalmerkmale sichtbar) / 'Gefälscht' (eindeutige Fälschungsmerkmale sichtbar) / 'Nicht sicher erkennbar' (bei Unsicherheit IMMER diese Option wählen)",
+  "echtheit_begruendung": "Ehrliche Einschätzung: Was konkret spricht dafür oder dagegen? Falls nicht sicher: klar benennen dass eine Prüfung vor dem Verkauf empfohlen wird.",
   "zustand_bewertung": "${zustand}",
   "neupreis": Aktueller Neupreis im Handel in Euro als Zahl (geschätzt anhand Marke und Modell),
   "neupreis_quelle": "Wo man den Artikel neu kaufen kann (z.B. Amazon, MediaMarkt, Hersteller etc.)",
