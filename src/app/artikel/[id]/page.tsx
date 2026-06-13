@@ -77,11 +77,39 @@ export default function ArtikelPage() {
       {/* Fotos */}
       {artikel.fotos?.length > 0 && (
         <div className="relative">
-          <img src={artikel.fotos[activeFoto]} alt="" className="w-full aspect-square object-cover" />
+          {/* Scrollbare Foto-Leiste */}
+          <div className="flex overflow-x-auto snap-x snap-mandatory" style={{ scrollbarWidth: "none" }}>
+            {artikel.fotos.map((foto, i) => (
+              <div key={i} className="flex-shrink-0 w-full snap-center relative">
+                <img src={foto} alt="" className="w-full aspect-square object-cover" />
+                {/* Kopieren Button */}
+                <button
+                  onClick={async () => {
+                    try {
+                      const res = await fetch(foto);
+                      const blob = await res.blob();
+                      await navigator.clipboard.write([new ClipboardItem({ [blob.type]: blob })]);
+                      setCopied(true);
+                      setTimeout(() => setCopied(false), 2000);
+                    } catch {
+                      // Fallback: URL kopieren
+                      navigator.clipboard.writeText(foto);
+                      setCopied(true);
+                      setTimeout(() => setCopied(false), 2000);
+                    }
+                  }}
+                  className="absolute bottom-3 right-3 px-3 py-1.5 rounded-xl text-xs font-semibold"
+                  style={{ backgroundColor: copied ? "#22c55e" : "#000000cc", color: "#fff" }}
+                >
+                  {copied ? "✓ Kopiert!" : "📋 Foto kopieren"}
+                </button>
+              </div>
+            ))}
+          </div>
           {artikel.fotos.length > 1 && (
-            <div className="absolute bottom-3 left-0 right-0 flex justify-center gap-2">
+            <div className="absolute bottom-12 left-0 right-0 flex justify-center gap-2 pointer-events-none">
               {artikel.fotos.map((_, i) => (
-                <button key={i} onClick={() => setActiveFoto(i)}
+                <div key={i}
                   className="w-2 h-2 rounded-full"
                   style={{ backgroundColor: i === activeFoto ? "#f59e0b" : "#ffffff88" }} />
               ))}
