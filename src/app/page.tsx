@@ -12,6 +12,7 @@ type Artikel = {
   zustand: string;
   preis_empfehlung: number;
   verkauft: boolean;
+  annonciert: boolean;
   fotos: string[];
   box_name: string;
   created_at: string;
@@ -59,8 +60,8 @@ export default function Home() {
   const filtered = artikel.filter(a => {
     if (filter === "alle") return true;
     if (filter === "verkauft") return a.verkauft;
-    if (filter === "inseriert") return (a as Record<string, unknown>).annonciert && !a.verkauft;
-    return !a.verkauft && !(a as Record<string, unknown>).annonciert;
+    if (filter === "inseriert") return a.annonciert && !a.verkauft;
+    return !a.verkauft && !a.annonciert;
   });
 
   const gesamtwert = artikel.filter(a => !a.verkauft).reduce((s, a) => s + (a.preis_empfehlung || 0), 0);
@@ -161,7 +162,7 @@ export default function Home() {
                       style={{ backgroundColor: "#14532d", color: "#22c55e" }}>
                       Verkauft
                     </div>
-                  ) : (a as Record<string, unknown>).annonciert ? (
+                  ) : a.annonciert ? (
                     <div className="text-xs mt-1 px-2 py-0.5 rounded-full"
                       style={{ backgroundColor: "#1e3a5f", color: "#60a5fa" }}>
                       Inseriert
