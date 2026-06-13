@@ -82,6 +82,26 @@ export default function ArtikelPage() {
     setTimeout(() => setCopied(false), 2000);
   }
 
+  async function insertieren(plattform: "kleinanzeigen" | "ebay" | "vinted" | "alle") {
+    if (!artikel) return;
+    const text = `${artikel.bezeichnung}\n\n${artikel.verkaufstext}\n\nPreis: ${artikel.preis_empfehlung} €\nZustand: ${artikel.zustand}`;
+    await navigator.clipboard.writeText(text);
+
+    const urls: Record<string, string> = {
+      kleinanzeigen: "https://www.kleinanzeigen.de/anzeige-aufgeben",
+      ebay: "https://www.ebay.de/sell",
+      vinted: "https://www.vinted.de/items/new",
+      alle: "",
+    };
+
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+
+    if (urls[plattform]) {
+      setTimeout(() => window.open(urls[plattform], "_blank"), 300);
+    }
+  }
+
   if (!artikel) return (
     <div className="min-h-screen flex items-center justify-center" style={{ color: "#888" }}>Laden...</div>
   );
@@ -195,15 +215,43 @@ export default function ArtikelPage() {
             )}
         </div>
 
-        {/* Plattformen */}
+        {/* Plattformen + Schnell-Einstellen */}
         {artikel.plattform?.length > 0 && (
           <div className="rounded-2xl p-4" style={{ backgroundColor: "#1a1a1a" }}>
             <div className="text-xs mb-2" style={{ color: "#888" }}>Empfohlene Plattformen</div>
-            <div className="flex gap-2 flex-wrap">
+            <div className="flex gap-2 flex-wrap mb-3">
               {artikel.plattform.map(p => (
                 <span key={p} className="px-3 py-1 rounded-full text-sm font-medium"
                   style={{ backgroundColor: "#292929", color: "#f59e0b" }}>{p}</span>
               ))}
+            </div>
+            <div className="flex flex-col gap-2">
+              {artikel.plattform.some(p => p.toLowerCase().includes("kleinanzeigen")) && (
+                <button onClick={() => insertieren("kleinanzeigen")}
+                  className="w-full py-2.5 rounded-xl text-sm font-semibold flex items-center justify-center gap-2"
+                  style={{ backgroundColor: "#1a2e1a", color: "#4ade80", border: "1px solid #166534" }}>
+                  🟢 Auf Kleinanzeigen einstellen
+                </button>
+              )}
+              {artikel.plattform.some(p => p.toLowerCase().includes("ebay")) && (
+                <button onClick={() => insertieren("ebay")}
+                  className="w-full py-2.5 rounded-xl text-sm font-semibold flex items-center justify-center gap-2"
+                  style={{ backgroundColor: "#1a1a2e", color: "#818cf8", border: "1px solid #3730a3" }}>
+                  🔵 Auf eBay einstellen
+                </button>
+              )}
+              {artikel.plattform.some(p => p.toLowerCase().includes("vinted")) && (
+                <button onClick={() => insertieren("vinted")}
+                  className="w-full py-2.5 rounded-xl text-sm font-semibold flex items-center justify-center gap-2"
+                  style={{ backgroundColor: "#0d1f1a", color: "#34d399", border: "1px solid #065f46" }}>
+                  🟩 Auf Vinted einstellen
+                </button>
+              )}
+              <button onClick={() => insertieren("alle")}
+                className="w-full py-2.5 rounded-xl text-sm font-semibold flex items-center justify-center gap-2"
+                style={{ backgroundColor: "#1f1a0d", color: "#fbbf24", border: "1px solid #92400e" }}>
+                📋 Titel + Text + Preis kopieren
+              </button>
             </div>
           </div>
         )}
