@@ -38,7 +38,7 @@ export default function NeuPage() {
         body: JSON.stringify({ images: fotos, zustand }),
       });
       const data = await res.json();
-      if (data.error) { setError("Analyse fehlgeschlagen. Nochmal versuchen."); }
+      if (data.error) { setError(`Fehler: ${data.error}`); }
       else { setErgebnis(data); }
     } catch {
       setError("Verbindungsfehler. Bitte nochmal versuchen.");

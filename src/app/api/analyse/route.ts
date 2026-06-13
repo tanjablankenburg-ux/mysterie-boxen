@@ -4,6 +4,10 @@ import { NextRequest, NextResponse } from "next/server";
 const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
 export async function POST(req: NextRequest) {
+  if (!process.env.ANTHROPIC_API_KEY) {
+    return NextResponse.json({ error: "API Key fehlt" }, { status: 500 });
+  }
+
   const { images, zustand } = await req.json();
 
   const imageContent = images.map((base64: string) => ({
