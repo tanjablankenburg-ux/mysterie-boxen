@@ -2,6 +2,7 @@
 import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
+import { getProfil } from "@/lib/profil";
 
 const ZUSTAENDE = ["Neu", "Sehr gut", "Gut", "Akzeptabel", "Defekt"];
 
@@ -75,6 +76,7 @@ export default function NeuPage() {
       echtheit: ergebnis.echtheit,
       fotos: fotos,
       verkauft: false,
+      profil: getProfil() || "Standard",
     }).select().single();
 
     if (err) { setError("Speichern fehlgeschlagen."); setSaving(false); return; }

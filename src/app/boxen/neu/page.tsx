@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
+import { getProfil } from "@/lib/profil";
 
 export default function NeueBoxPage() {
   const router = useRouter();
@@ -17,6 +18,7 @@ export default function NeueBoxPage() {
       name,
       einkaufspreis: parseInt(preis) || 0,
       notizen,
+      profil: getProfil() || "Standard",
     });
     router.push("/boxen");
   }

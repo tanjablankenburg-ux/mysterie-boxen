@@ -2,6 +2,8 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { supabase } from "@/lib/supabase";
+import { getProfil, setProfil } from "@/lib/profil";
+import ProfilWahl from "@/components/ProfilWahl";
 
 type Artikel = {
   id: string;
@@ -16,21 +18,42 @@ type Artikel = {
 };
 
 export default function Home() {
+  const [profil, setProfil_] = useState<string>("");
+  const [showProfilWahl, setShowProfilWahl] = useState(false);
   const [artikel, setArtikel] = useState<Artikel[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<"alle" | "offen" | "verkauft">("alle");
 
   useEffect(() => {
-    loadArtikel();
+    const p = getProfil();
+    if (!p) { setLoading(false); return; }
+    setProfil_(p);
+    loadArtikel(p);
   }, []);
 
-  async function loadArtikel() {
+  async function loadArtikel(p: string) {
+    setLoading(true);
     const { data } = await supabase
       .from("artikel")
       .select("*")
+      .eq("profil", p)
       .order("created_at", { ascending: false });
     setArtikel(data || []);
     setLoading(false);
+  }
+
+  function handleProfil(name: string) {
+    setProfil_(name);
+    setProfil(name);
+    loadArtikel(name);
+  }
+
+  function wechsleProfil() {
+    setShowProfilWahl(true);
+  }
+
+  if (!profil || showProfilWahl) {
+    return <ProfilWahl onProfil={(name) => { setShowProfilWahl(false); handleProfil(name); }} />;
   }
 
   const filtered = artikel.filter(a =>
@@ -46,7 +69,10 @@ export default function Home() {
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl font-bold">📦 Mystery Box</h1>
-          <p className="text-sm" style={{ color: "#888" }}>Deine Artikel im Überblick</p>
+          <button onClick={wechsleProfil} className="text-sm flex items-center gap-1 mt-0.5"
+            style={{ color: "#f59e0b" }}>
+            👤 {profil} <span style={{ color: "#666" }}>wechseln</span>
+          </button>
         </div>
         <div className="flex gap-2">
           <Link href="/boxen"
@@ -54,7 +80,7 @@ export default function Home() {
             style={{ backgroundColor: "#1a1a1a", color: "#f59e0b", border: "1px solid #333" }}>
             Boxen
           </Link>
-          <Link href="/neu"
+          <Link href={`/neu?profil=${encodeURIComponent(profil)}`}
             className="px-4 py-2 rounded-xl font-semibold text-sm text-black"
             style={{ backgroundColor: "#f59e0b" }}>
             + Neu
@@ -79,15 +105,12 @@ export default function Home() {
       {/* Filter */}
       <div className="flex gap-2 mb-4">
         {(["alle", "offen", "verkauft"] as const).map(f => (
-          <button
-            key={f}
-            onClick={() => setFilter(f)}
+          <button key={f} onClick={() => setFilter(f)}
             className="px-3 py-1.5 rounded-full text-sm font-medium capitalize"
             style={{
               backgroundColor: filter === f ? "#f59e0b" : "#1a1a1a",
               color: filter === f ? "#000" : "#888",
-            }}
-          >
+            }}>
             {f}
           </button>
         ))}
@@ -100,7 +123,8 @@ export default function Home() {
         <div className="text-center py-12">
           <div className="text-4xl mb-3">📦</div>
           <p style={{ color: "#888" }}>Noch keine Artikel. Füge deinen ersten hinzu!</p>
-          <Link href="/neu" className="inline-block mt-4 px-6 py-3 rounded-xl font-semibold text-black"
+          <Link href={`/neu?profil=${encodeURIComponent(profil)}`}
+            className="inline-block mt-4 px-6 py-3 rounded-xl font-semibold text-black"
             style={{ backgroundColor: "#f59e0b" }}>
             Ersten Artikel erfassen
           </Link>
@@ -130,7 +154,8 @@ export default function Home() {
                     {a.preis_empfehlung ? `${a.preis_empfehlung} €` : "–"}
                   </div>
                   {a.verkauft && (
-                    <div className="text-xs mt-1 px-2 py-0.5 rounded-full" style={{ backgroundColor: "#14532d", color: "#22c55e" }}>
+                    <div className="text-xs mt-1 px-2 py-0.5 rounded-full"
+                      style={{ backgroundColor: "#14532d", color: "#22c55e" }}>
                       Verkauft
                     </div>
                   )}

@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
+import { getProfil } from "@/lib/profil";
 
 type Box = {
   id: string;
@@ -18,14 +19,15 @@ export default function BoxenPage() {
   const router = useRouter();
   const [boxen, setBoxen] = useState<Box[]>([]);
   const [loading, setLoading] = useState(true);
+  const profil = getProfil() || "Standard";
 
   useEffect(() => {
     loadBoxen();
   }, []);
 
   async function loadBoxen() {
-    const { data: boxData } = await supabase.from("boxen").select("*").order("created_at", { ascending: false });
-    const { data: artikelData } = await supabase.from("artikel").select("box_name, preis_empfehlung, verkauft");
+    const { data: boxData } = await supabase.from("boxen").select("*").eq("profil", profil).order("created_at", { ascending: false });
+    const { data: artikelData } = await supabase.from("artikel").select("box_name, preis_empfehlung, verkauft").eq("profil", profil);
 
     const enriched = (boxData || []).map((box: Box) => {
       const artikel = (artikelData || []).filter(a => a.box_name === box.name);
@@ -40,7 +42,7 @@ export default function BoxenPage() {
   }
 
   function exportCSV() {
-    supabase.from("artikel").select("*").then(({ data }) => {
+    supabase.from("artikel").select("*").eq("profil", profil).then(({ data }) => {
       if (!data?.length) return;
       const headers = ["Bezeichnung", "Kategorie", "Zustand", "Neupreis", "Preis Min", "Preis Max", "Empfehlung", "Plattform", "Echtheit", "Box", "Verkauft", "Verkaufstext"];
       const rows = data.map(a => [
