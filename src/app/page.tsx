@@ -48,13 +48,18 @@ export default function Home() {
           <h1 className="text-2xl font-bold">📦 Mystery Box</h1>
           <p className="text-sm" style={{ color: "#888" }}>Deine Artikel im Überblick</p>
         </div>
-        <Link
-          href="/neu"
-          className="px-4 py-2 rounded-xl font-semibold text-sm text-white"
-          style={{ backgroundColor: "#f59e0b" }}
-        >
-          + Neu
-        </Link>
+        <div className="flex gap-2">
+          <Link href="/boxen"
+            className="px-3 py-2 rounded-xl font-semibold text-sm"
+            style={{ backgroundColor: "#1a1a1a", color: "#f59e0b", border: "1px solid #333" }}>
+            Boxen
+          </Link>
+          <Link href="/neu"
+            className="px-4 py-2 rounded-xl font-semibold text-sm text-black"
+            style={{ backgroundColor: "#f59e0b" }}>
+            + Neu
+          </Link>
+        </div>
       </div>
 
       {/* Stats */}

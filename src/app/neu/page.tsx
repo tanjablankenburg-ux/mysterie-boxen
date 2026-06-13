@@ -67,6 +67,8 @@ export default function NeuPage() {
       preis_min: ergebnis.preis_min,
       preis_max: ergebnis.preis_max,
       preis_empfehlung: ergebnis.preis_empfehlung,
+      neupreis: ergebnis.neupreis,
+      neupreis_quelle: ergebnis.neupreis_quelle,
       plattform: ergebnis.plattform,
       verkaufstext: ergebnis.verkaufstext_lang,
       echtheit: ergebnis.echtheit,

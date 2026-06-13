@@ -1,6 +1,7 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useRouter, useParams } from "next/navigation";
+import QRCode from "qrcode";
 import { supabase } from "@/lib/supabase";
 
 type Artikel = {
@@ -11,6 +12,8 @@ type Artikel = {
   preis_min: number;
   preis_max: number;
   preis_empfehlung: number;
+  neupreis: number;
+  neupreis_quelle: string;
   plattform: string[];
   verkaufstext: string;
   echtheit: string;
@@ -28,10 +31,18 @@ export default function ArtikelPage() {
   const [notizen, setNotizen] = useState("");
   const [copied, setCopied] = useState(false);
   const [activeFoto, setActiveFoto] = useState(0);
+  const [qrUrl, setQrUrl] = useState("");
 
   useEffect(() => {
     supabase.from("artikel").select("*").eq("id", id).single()
-      .then(({ data }) => { if (data) { setArtikel(data); setNotizen(data.notizen || ""); } });
+      .then(({ data }) => {
+        if (data) {
+          setArtikel(data);
+          setNotizen(data.notizen || "");
+          const url = `${window.location.origin}/artikel/${data.id}`;
+          QRCode.toDataURL(url, { width: 200 }).then(setQrUrl);
+        }
+      });
   }, [id]);
 
   async function toggleVerkauft() {
@@ -105,6 +116,24 @@ export default function ArtikelPage() {
           </div>
         </div>
 
+        {/* Neupreis */}
+        {artikel.neupreis > 0 && (
+          <div className="rounded-2xl p-4" style={{ backgroundColor: "#1a1a1a" }}>
+            <div className="text-xs mb-1" style={{ color: "#888" }}>Neupreis im Handel</div>
+            <div className="flex items-center gap-2">
+              <span className="text-xl font-bold" style={{ color: "#60a5fa" }}>{artikel.neupreis} €</span>
+              {artikel.neupreis_quelle && (
+                <span className="text-xs" style={{ color: "#666" }}>bei {artikel.neupreis_quelle}</span>
+              )}
+            </div>
+            {artikel.preis_empfehlung > 0 && (
+              <div className="text-xs mt-1" style={{ color: "#888" }}>
+                Du verkaufst für {artikel.preis_empfehlung} € = {Math.round((artikel.preis_empfehlung / artikel.neupreis) * 100)}% vom Neupreis
+              </div>
+            )}
+          </div>
+        )}
+
         {/* Echtheit */}
         <div className="rounded-2xl p-4" style={{ backgroundColor: "#1a1a1a" }}>
           <div className="text-xs mb-1" style={{ color: "#888" }}>Echtheit</div>
@@ -155,6 +184,19 @@ export default function ArtikelPage() {
             style={{ color: "#ccc" }}
           />
         </div>
+
+        {/* QR Code */}
+        {qrUrl && (
+          <div className="rounded-2xl p-4 text-center" style={{ backgroundColor: "#1a1a1a" }}>
+            <div className="text-xs mb-3" style={{ color: "#888" }}>QR-Code — zum Aufkleben auf den Artikel</div>
+            <img src={qrUrl} alt="QR Code" className="mx-auto rounded-xl" style={{ width: 120, imageRendering: "pixelated" }} />
+            <a href={qrUrl} download={`qr-${artikel.id}.png`}
+              className="inline-block mt-3 text-xs px-3 py-1.5 rounded-lg"
+              style={{ backgroundColor: "#292929", color: "#f59e0b" }}>
+              📥 QR-Code speichern
+            </a>
+          </div>
+        )}
 
         {/* Aktionen */}
         <div className="space-y-3 pt-2">
