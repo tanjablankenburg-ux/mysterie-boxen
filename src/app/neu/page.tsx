@@ -19,11 +19,21 @@ export default function NeuPage() {
   function handleFotos(e: React.ChangeEvent<HTMLInputElement>) {
     const files = Array.from(e.target.files || []);
     files.forEach(file => {
-      const reader = new FileReader();
-      reader.onload = ev => {
-        setFotos(prev => [...prev, ev.target?.result as string]);
+      const img = new Image();
+      const url = URL.createObjectURL(file);
+      img.onload = () => {
+        const canvas = document.createElement("canvas");
+        const maxSize = 800;
+        let w = img.width, h = img.height;
+        if (w > h && w > maxSize) { h = (h * maxSize) / w; w = maxSize; }
+        else if (h > maxSize) { w = (w * maxSize) / h; h = maxSize; }
+        canvas.width = w; canvas.height = h;
+        canvas.getContext("2d")!.drawImage(img, 0, 0, w, h);
+        const compressed = canvas.toDataURL("image/jpeg", 0.7);
+        setFotos(prev => [...prev, compressed]);
+        URL.revokeObjectURL(url);
       };
-      reader.readAsDataURL(file);
+      img.src = url;
     });
   }
 
