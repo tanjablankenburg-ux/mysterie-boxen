@@ -22,7 +22,7 @@ export default function Home() {
   const [showProfilWahl, setShowProfilWahl] = useState(false);
   const [artikel, setArtikel] = useState<Artikel[]>([]);
   const [loading, setLoading] = useState(true);
-  const [filter, setFilter] = useState<"alle" | "offen" | "verkauft">("alle");
+  const [filter, setFilter] = useState<"alle" | "offen" | "inseriert" | "verkauft">("alle");
 
   useEffect(() => {
     const p = getProfil();
@@ -56,9 +56,12 @@ export default function Home() {
     return <ProfilWahl onProfil={(name) => { setShowProfilWahl(false); handleProfil(name); }} />;
   }
 
-  const filtered = artikel.filter(a =>
-    filter === "alle" ? true : filter === "verkauft" ? a.verkauft : !a.verkauft
-  );
+  const filtered = artikel.filter(a => {
+    if (filter === "alle") return true;
+    if (filter === "verkauft") return a.verkauft;
+    if (filter === "inseriert") return (a as Record<string, unknown>).annonciert && !a.verkauft;
+    return !a.verkauft && !(a as Record<string, unknown>).annonciert;
+  });
 
   const gesamtwert = artikel.filter(a => !a.verkauft).reduce((s, a) => s + (a.preis_empfehlung || 0), 0);
   const verkauftWert = artikel.filter(a => a.verkauft).reduce((s, a) => s + (a.preis_empfehlung || 0), 0);
@@ -104,7 +107,7 @@ export default function Home() {
 
       {/* Filter */}
       <div className="flex gap-2 mb-4">
-        {(["alle", "offen", "verkauft"] as const).map(f => (
+        {(["alle", "offen", "inseriert", "verkauft"] as const).map(f => (
           <button key={f} onClick={() => setFilter(f)}
             className="px-3 py-1.5 rounded-full text-sm font-medium capitalize"
             style={{
@@ -153,12 +156,17 @@ export default function Home() {
                   <div className="font-bold" style={{ color: "#f59e0b" }}>
                     {a.preis_empfehlung ? `${a.preis_empfehlung} €` : "–"}
                   </div>
-                  {a.verkauft && (
+                  {a.verkauft ? (
                     <div className="text-xs mt-1 px-2 py-0.5 rounded-full"
                       style={{ backgroundColor: "#14532d", color: "#22c55e" }}>
                       Verkauft
                     </div>
-                  )}
+                  ) : (a as Record<string, unknown>).annonciert ? (
+                    <div className="text-xs mt-1 px-2 py-0.5 rounded-full"
+                      style={{ backgroundColor: "#1e3a5f", color: "#60a5fa" }}>
+                      Inseriert
+                    </div>
+                  ) : null}
                 </div>
               </div>
             </Link>

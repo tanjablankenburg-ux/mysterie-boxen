@@ -20,6 +20,7 @@ type Artikel = {
   echtheit_begruendung: string;
   fotos: string[];
   verkauft: boolean;
+  annonciert: boolean;
   box_name: string;
   notizen: string;
   created_at: string;
@@ -60,6 +61,12 @@ export default function ArtikelPage() {
     if (!confirm("Artikel wirklich löschen?")) return;
     await supabase.from("artikel").delete().eq("id", id);
     router.push("/");
+  }
+
+  async function toggleAnnonciert() {
+    if (!artikel) return;
+    await supabase.from("artikel").update({ annonciert: !artikel.annonciert }).eq("id", id);
+    setArtikel({ ...artikel, annonciert: !artikel.annonciert });
   }
 
   async function duplizieren() {
@@ -125,10 +132,16 @@ export default function ArtikelPage() {
           <button onClick={() => router.back()}
             className="absolute top-4 left-4 w-9 h-9 rounded-full flex items-center justify-center font-bold"
             style={{ backgroundColor: "#000000aa", color: "#fff" }}>←</button>
-          {artikel.verkauft && (
-            <div className="absolute top-4 right-4 px-3 py-1 rounded-full text-sm font-bold"
-              style={{ backgroundColor: "#14532d", color: "#22c55e" }}>✓ Verkauft</div>
-          )}
+          <div className="absolute top-4 right-4 flex flex-col gap-2 items-end">
+            {artikel.verkauft && (
+              <div className="px-3 py-1 rounded-full text-sm font-bold"
+                style={{ backgroundColor: "#14532d", color: "#22c55e" }}>✓ Verkauft</div>
+            )}
+            {artikel.annonciert && !artikel.verkauft && (
+              <div className="px-3 py-1 rounded-full text-sm font-bold"
+                style={{ backgroundColor: "#1e3a5f", color: "#60a5fa" }}>📢 Inseriert</div>
+            )}
+          </div>
         </div>
       )}
 
@@ -243,6 +256,15 @@ export default function ArtikelPage() {
             className="w-full py-3 rounded-2xl font-semibold"
             style={{ backgroundColor: "#1a1a1a", color: "#f59e0b", border: "1px solid #333" }}>
             📋 Artikel duplizieren
+          </button>
+          <button onClick={toggleAnnonciert}
+            className="w-full py-3 rounded-2xl font-bold"
+            style={{
+              backgroundColor: artikel.annonciert ? "#1c1917" : "#172554",
+              color: artikel.annonciert ? "#a8a29e" : "#60a5fa",
+              border: artikel.annonciert ? "1px solid #333" : "none",
+            }}>
+            {artikel.annonciert ? "📢 Inserat entfernen" : "📢 Als inseriert markieren"}
           </button>
           <button onClick={toggleVerkauft}
             className="w-full py-3 rounded-2xl font-bold"
