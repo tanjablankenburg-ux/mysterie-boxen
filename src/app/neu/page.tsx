@@ -180,9 +180,9 @@ export default function NeuPage() {
             }}>
               {ergebnis.echtheit as string}
             </div>
-            {ergebnis.echtheit_begruendung && (
+            {(ergebnis as Record<string, unknown>).echtheit_begruendung && (
               <div className="text-sm leading-relaxed" style={{ color: "#aaa" }}>
-                {ergebnis.echtheit_begruendung as string}
+                {(ergebnis as Record<string, unknown>).echtheit_begruendung as string}
               </div>
             )}
           </div>
