@@ -69,6 +69,7 @@ export default function NeuPage() {
       preis_empfehlung: ergebnis.preis_empfehlung,
       neupreis: ergebnis.neupreis,
       neupreis_quelle: ergebnis.neupreis_quelle,
+      echtheit_begruendung: ergebnis.echtheit_begruendung,
       plattform: ergebnis.plattform,
       verkaufstext: ergebnis.verkaufstext_lang,
       echtheit: ergebnis.echtheit,
@@ -173,13 +174,17 @@ export default function NeuPage() {
 
           <div className="rounded-2xl p-4" style={{ backgroundColor: "#1a1a1a" }}>
             <div className="text-xs mb-1" style={{ color: "#888" }}>Echtheit</div>
-            <div className="font-semibold" style={{
+            <div className="font-semibold mb-1" style={{
               color: (ergebnis.echtheit as string).includes("Gefälscht") ? "#ef4444" :
                 (ergebnis.echtheit as string).includes("Echt") ? "#22c55e" : "#f59e0b"
             }}>
               {ergebnis.echtheit as string}
             </div>
-            <div className="text-xs mt-1" style={{ color: "#888" }}>{ergebnis.echtheit_begruendung as string}</div>
+            {ergebnis.echtheit_begruendung && (
+              <div className="text-sm leading-relaxed" style={{ color: "#aaa" }}>
+                {ergebnis.echtheit_begruendung as string}
+              </div>
+            )}
           </div>
 
           <div className="rounded-2xl p-4" style={{ backgroundColor: "#1a1a1a" }}>

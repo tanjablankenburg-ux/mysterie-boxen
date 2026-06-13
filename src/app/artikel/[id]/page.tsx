@@ -17,6 +17,7 @@ type Artikel = {
   plattform: string[];
   verkaufstext: string;
   echtheit: string;
+  echtheit_begruendung: string;
   fotos: string[];
   verkauft: boolean;
   box_name: string;
@@ -141,6 +142,9 @@ export default function ArtikelPage() {
             color: artikel.echtheit?.includes("Gefälscht") ? "#ef4444" :
               artikel.echtheit?.includes("Echt") ? "#22c55e" : "#f59e0b"
           }}>{artikel.echtheit}</div>
+            {artikel.echtheit_begruendung && (
+              <div className="text-sm mt-1 leading-relaxed" style={{ color: "#aaa" }}>{artikel.echtheit_begruendung}</div>
+            )}
         </div>
 
         {/* Plattformen */}
