@@ -29,7 +29,7 @@ Erstelle eine JSON-Antwort mit folgenden Feldern:
   "kategorie": "Eine von: Elektronik, Spielzeug, Kleidung, Schuhe, Schmuck, Haushalt, Sport, Bücher, Sammler, Sonstiges",
   "echtheit": "Echt / Gefälscht / Wahrscheinlich echt / Wahrscheinlich gefälscht / Nicht erkennbar",
   "echtheit_begruendung": "Kurze Begründung zur Echtheit",
-  "zustand_bewertung": "Exakt der vom Nutzer angegebene Zustand: Neuwertig / Sehr gut / Gut / Akzeptabel / Defekt",
+  "zustand_bewertung": "${zustand}",
   "neupreis": Aktueller Neupreis im Handel in Euro als Zahl (geschätzt anhand Marke und Modell),
   "neupreis_quelle": "Wo man den Artikel neu kaufen kann (z.B. Amazon, MediaMarkt, Hersteller etc.)",
   "preis_min": Mindestpreis Secondhand in Euro als Zahl,
