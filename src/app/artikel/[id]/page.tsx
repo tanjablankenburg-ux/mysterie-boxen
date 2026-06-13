@@ -32,6 +32,8 @@ export default function ArtikelPage() {
   const [artikel, setArtikel] = useState<Artikel | null>(null);
   const [notizen, setNotizen] = useState("");
   const [copied, setCopied] = useState(false);
+  const [copiedField, setCopiedField] = useState<string | null>(null);
+  const [showInserat, setShowInserat] = useState(false);
   const [activeFoto, setActiveFoto] = useState(0);
   const [qrUrl, setQrUrl] = useState("");
 
@@ -82,24 +84,10 @@ export default function ArtikelPage() {
     setTimeout(() => setCopied(false), 2000);
   }
 
-  async function insertieren(plattform: "kleinanzeigen" | "ebay" | "vinted" | "alle") {
-    if (!artikel) return;
-    const text = `${artikel.bezeichnung}\n\n${artikel.verkaufstext}\n\nPreis: ${artikel.preis_empfehlung} €\nZustand: ${artikel.zustand}`;
-    await navigator.clipboard.writeText(text);
-
-    const urls: Record<string, string> = {
-      kleinanzeigen: "https://www.kleinanzeigen.de/anzeige-aufgeben",
-      ebay: "https://www.ebay.de/sell",
-      vinted: "https://www.vinted.de/items/new",
-      alle: "",
-    };
-
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-
-    if (urls[plattform]) {
-      setTimeout(() => window.open(urls[plattform], "_blank"), 300);
-    }
+  function copyField(text: string, field: string) {
+    navigator.clipboard.writeText(text);
+    setCopiedField(field);
+    setTimeout(() => setCopiedField(null), 2000);
   }
 
   if (!artikel) return (
@@ -215,7 +203,7 @@ export default function ArtikelPage() {
             )}
         </div>
 
-        {/* Plattformen + Schnell-Einstellen */}
+        {/* Plattformen */}
         {artikel.plattform?.length > 0 && (
           <div className="rounded-2xl p-4" style={{ backgroundColor: "#1a1a1a" }}>
             <div className="text-xs mb-2" style={{ color: "#888" }}>Empfohlene Plattformen</div>
@@ -225,34 +213,11 @@ export default function ArtikelPage() {
                   style={{ backgroundColor: "#292929", color: "#f59e0b" }}>{p}</span>
               ))}
             </div>
-            <div className="flex flex-col gap-2">
-              {artikel.plattform.some(p => p.toLowerCase().includes("kleinanzeigen")) && (
-                <button onClick={() => insertieren("kleinanzeigen")}
-                  className="w-full py-2.5 rounded-xl text-sm font-semibold flex items-center justify-center gap-2"
-                  style={{ backgroundColor: "#1a2e1a", color: "#4ade80", border: "1px solid #166534" }}>
-                  🟢 Auf Kleinanzeigen einstellen
-                </button>
-              )}
-              {artikel.plattform.some(p => p.toLowerCase().includes("ebay")) && (
-                <button onClick={() => insertieren("ebay")}
-                  className="w-full py-2.5 rounded-xl text-sm font-semibold flex items-center justify-center gap-2"
-                  style={{ backgroundColor: "#1a1a2e", color: "#818cf8", border: "1px solid #3730a3" }}>
-                  🔵 Auf eBay einstellen
-                </button>
-              )}
-              {artikel.plattform.some(p => p.toLowerCase().includes("vinted")) && (
-                <button onClick={() => insertieren("vinted")}
-                  className="w-full py-2.5 rounded-xl text-sm font-semibold flex items-center justify-center gap-2"
-                  style={{ backgroundColor: "#0d1f1a", color: "#34d399", border: "1px solid #065f46" }}>
-                  🟩 Auf Vinted einstellen
-                </button>
-              )}
-              <button onClick={() => insertieren("alle")}
-                className="w-full py-2.5 rounded-xl text-sm font-semibold flex items-center justify-center gap-2"
-                style={{ backgroundColor: "#1f1a0d", color: "#fbbf24", border: "1px solid #92400e" }}>
-                📋 Titel + Text + Preis kopieren
-              </button>
-            </div>
+            <button onClick={() => setShowInserat(true)}
+              className="w-full py-3 rounded-xl text-sm font-bold"
+              style={{ backgroundColor: "#f59e0b", color: "#000" }}>
+              📋 Anzeige vorbereiten
+            </button>
           </div>
         )}
 
@@ -330,6 +295,129 @@ export default function ArtikelPage() {
           </button>
         </div>
       </div>
+      {/* Anzeige vorbereiten Modal */}
+      {showInserat && (
+        <div className="fixed inset-0 z-50 flex flex-col" style={{ backgroundColor: "#0f0f0f" }}>
+          <div className="flex items-center gap-3 px-4 py-5 border-b" style={{ borderColor: "#222" }}>
+            <button onClick={() => setShowInserat(false)} className="text-xl">←</button>
+            <h2 className="text-lg font-bold">Anzeige vorbereiten</h2>
+          </div>
+          <div className="flex-1 overflow-y-auto px-4 py-4 space-y-3 pb-10">
+            <p className="text-sm" style={{ color: "#888" }}>
+              Öffne eBay / Kleinanzeigen / Vinted im Browser, dann kopiere Feld für Feld hier raus und füge es ein.
+            </p>
+
+            {[
+              { label: "Titel", value: artikel.bezeichnung, field: "titel" },
+              { label: "Preis (€)", value: String(artikel.preis_empfehlung), field: "preis" },
+              { label: "Zustand", value: artikel.zustand, field: "zustand" },
+              { label: "Kategorie", value: artikel.kategorie, field: "kategorie" },
+            ].map(({ label, value, field }) => (
+              <div key={field} className="rounded-2xl p-4" style={{ backgroundColor: "#1a1a1a" }}>
+                <div className="flex items-center justify-between mb-1">
+                  <div className="text-xs font-medium" style={{ color: "#888" }}>{label}</div>
+                  <button onClick={() => copyField(value, field)}
+                    className="text-xs px-3 py-1 rounded-lg font-semibold"
+                    style={{
+                      backgroundColor: copiedField === field ? "#14532d" : "#292929",
+                      color: copiedField === field ? "#22c55e" : "#f59e0b"
+                    }}>
+                    {copiedField === field ? "✓ Kopiert!" : "Kopieren"}
+                  </button>
+                </div>
+                <div className="font-semibold">{value}</div>
+              </div>
+            ))}
+
+            <div className="rounded-2xl p-4" style={{ backgroundColor: "#1a1a1a" }}>
+              <div className="flex items-center justify-between mb-2">
+                <div className="text-xs font-medium" style={{ color: "#888" }}>Beschreibung (kurz)</div>
+                <button onClick={() => copyField(artikel.verkaufstext?.slice(0, 300) || "", "kurz")}
+                  className="text-xs px-3 py-1 rounded-lg font-semibold"
+                  style={{
+                    backgroundColor: copiedField === "kurz" ? "#14532d" : "#292929",
+                    color: copiedField === "kurz" ? "#22c55e" : "#f59e0b"
+                  }}>
+                  {copiedField === "kurz" ? "✓ Kopiert!" : "Kopieren"}
+                </button>
+              </div>
+              <p className="text-sm leading-relaxed" style={{ color: "#ccc" }}>{artikel.verkaufstext?.slice(0, 300)}</p>
+            </div>
+
+            <div className="rounded-2xl p-4" style={{ backgroundColor: "#1a1a1a" }}>
+              <div className="flex items-center justify-between mb-2">
+                <div className="text-xs font-medium" style={{ color: "#888" }}>Beschreibung (lang, für eBay)</div>
+                <button onClick={() => copyField(artikel.verkaufstext || "", "lang")}
+                  className="text-xs px-3 py-1 rounded-lg font-semibold"
+                  style={{
+                    backgroundColor: copiedField === "lang" ? "#14532d" : "#292929",
+                    color: copiedField === "lang" ? "#22c55e" : "#f59e0b"
+                  }}>
+                  {copiedField === "lang" ? "✓ Kopiert!" : "Kopieren"}
+                </button>
+              </div>
+              <p className="text-sm leading-relaxed" style={{ color: "#ccc" }}>{artikel.verkaufstext}</p>
+            </div>
+
+            {artikel.fotos?.length > 0 && (
+              <div className="rounded-2xl p-4" style={{ backgroundColor: "#1a1a1a" }}>
+                <div className="text-xs font-medium mb-3" style={{ color: "#888" }}>Fotos</div>
+                <div className="grid grid-cols-3 gap-2">
+                  {artikel.fotos.map((foto, i) => (
+                    <div key={i} className="relative">
+                      <img src={foto} alt="" className="w-full aspect-square object-cover rounded-xl" />
+                      <button
+                        onClick={async () => {
+                          try {
+                            const res = await fetch(foto);
+                            const blob = await res.blob();
+                            await navigator.clipboard.write([new ClipboardItem({ [blob.type]: blob })]);
+                            setCopiedField(`foto-${i}`);
+                            setTimeout(() => setCopiedField(null), 2000);
+                          } catch {
+                            setCopiedField(`foto-${i}`);
+                            setTimeout(() => setCopiedField(null), 2000);
+                          }
+                        }}
+                        className="absolute bottom-1 right-1 text-xs px-2 py-1 rounded-lg font-semibold"
+                        style={{
+                          backgroundColor: copiedField === `foto-${i}` ? "#14532d" : "#000000cc",
+                          color: copiedField === `foto-${i}` ? "#22c55e" : "#fff"
+                        }}>
+                        {copiedField === `foto-${i}` ? "✓" : "📋"}
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            <div className="flex gap-2 pt-2">
+              {artikel.plattform?.some(p => p.toLowerCase().includes("kleinanzeigen")) && (
+                <a href="https://www.kleinanzeigen.de/anzeige-aufgeben" target="_blank" rel="noreferrer"
+                  className="flex-1 py-3 rounded-xl text-sm font-semibold text-center"
+                  style={{ backgroundColor: "#1a2e1a", color: "#4ade80", border: "1px solid #166534" }}>
+                  Kleinanzeigen öffnen →
+                </a>
+              )}
+              {artikel.plattform?.some(p => p.toLowerCase().includes("ebay")) && (
+                <a href="https://www.ebay.de/sell" target="_blank" rel="noreferrer"
+                  className="flex-1 py-3 rounded-xl text-sm font-semibold text-center"
+                  style={{ backgroundColor: "#1a1a2e", color: "#818cf8", border: "1px solid #3730a3" }}>
+                  eBay öffnen →
+                </a>
+              )}
+              {artikel.plattform?.some(p => p.toLowerCase().includes("vinted")) && (
+                <a href="https://www.vinted.de/items/new" target="_blank" rel="noreferrer"
+                  className="flex-1 py-3 rounded-xl text-sm font-semibold text-center"
+                  style={{ backgroundColor: "#0d1f1a", color: "#34d399", border: "1px solid #065f46" }}>
+                  Vinted öffnen →
+                </a>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </main>
   );
 }
