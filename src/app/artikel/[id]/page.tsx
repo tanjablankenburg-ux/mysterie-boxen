@@ -62,6 +62,13 @@ export default function ArtikelPage() {
     router.push("/");
   }
 
+  async function duplizieren() {
+    if (!artikel) return;
+    const { id: _, created_at: __, ...rest } = artikel as Record<string, unknown>;
+    const { data } = await supabase.from("artikel").insert({ ...rest, verkauft: false }).select().single();
+    if (data) router.push(`/artikel/${data.id}`);
+  }
+
   function copyText(text: string) {
     navigator.clipboard.writeText(text);
     setCopied(true);
@@ -232,6 +239,11 @@ export default function ArtikelPage() {
 
         {/* Aktionen */}
         <div className="space-y-3 pt-2">
+          <button onClick={duplizieren}
+            className="w-full py-3 rounded-2xl font-semibold"
+            style={{ backgroundColor: "#1a1a1a", color: "#f59e0b", border: "1px solid #333" }}>
+            📋 Artikel duplizieren
+          </button>
           <button onClick={toggleVerkauft}
             className="w-full py-3 rounded-2xl font-bold"
             style={{
